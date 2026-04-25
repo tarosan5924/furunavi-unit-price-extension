@@ -1,0 +1,25 @@
+{
+  "name": "furunavi-unit-price-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.16.0",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "build": "vite build",
+    "icons": "node scripts/generate-icons.mjs",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.12",
+    "@types/chrome": "0.1.40",
+    "jsdom": "29.0.2",
+    "lefthook": "2.1.6",
+    "typescript": "6.0.3",
+    "vite": "8.0.8",
+    "vitest": "4.1.4"
+  }
+}
