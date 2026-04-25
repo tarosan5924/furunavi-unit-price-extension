@@ -41,6 +41,10 @@ export function processCard(card: Element, schema: CardSchema): boolean {
   if (card.getAttribute("data-furunavi-up") === "1") {
     return false;
   }
+  // 属性リセット後の再処理時に古いバッジが残っている場合は除去する
+  for (const stale of card.querySelectorAll(".furunavi-up-badge")) {
+    stale.remove();
+  }
 
   const priceEl = card.querySelector(schema.price);
   const price = parsePrice(priceEl?.textContent ?? "");
