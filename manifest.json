@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "ふるなび単価表示",
+  "description": "ふるなびの返礼品に 100g/1L/1個 あたりの寄付額を自動表示します",
+  "version": "0.1.0",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://furunavi.jp/*", "*://*.furunavi.jp/*"],
+      "js": ["dist/content.js"],
+      "css": ["styles/badge.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

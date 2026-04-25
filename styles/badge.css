@@ -1,0 +1,23 @@
+.furunavi-up-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.4;
+  vertical-align: middle;
+  color: #fff;
+}
+.furunavi-up-badge--weight {
+  background: #16a34a;
+} /* 緑: 重量 */
+.furunavi-up-badge--volume {
+  background: #2563eb;
+} /* 青: 容量 */
+.furunavi-up-badge--count {
+  background: #ea580c;
+} /* 橙: 個数 */
+.furunavi-up-badge--unknown {
+  background: #6b7280;
+} /* 灰: 不明 */
