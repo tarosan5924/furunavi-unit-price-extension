@@ -37,6 +37,9 @@ type RawQuantity = {
  * テキスト内の重量・容量表現をすべて抽出する。
  * 「500g×2パック」のような乗算も合計値に展開する。
  * SECONDARY_KEYWORDS の直後に現れる量は副次的とみなす。
+ *
+ * @param text - 商品名・説明文などの生テキスト
+ * @returns 抽出した量の配列（副次フラグ付き）。マッチがなければ空配列。
  */
 function extractQuantities(text: string): RawQuantity[] {
   // 乗算パターン: 500g×2 / 1.2kg×3 など
@@ -81,6 +84,9 @@ function extractQuantities(text: string): RawQuantity[] {
 /**
  * RawQuantity を g または ml に正規化して合計する。
  * 重量と容量が混在する場合は `null` を返す。
+ *
+ * @param qs - `extractQuantities` が返した量の配列（副次量除去済みを想定）
+ * @returns 重量または容量の正規化結果。混在または空の場合は `null`。
  */
 function normalizeQuantities(
   qs: RawQuantity[],
@@ -116,7 +122,9 @@ function normalizeQuantities(
  * テキストから個数を抽出する。
  * 重量・容量が既に見つかっている場合は房・株などは無視する。
  *
- * @returns `{ count, unitLabel }` または `null`
+ * @param text - 商品名・説明文などの生テキスト
+ * @param hasWeightOrVolume - 重量または容量が既に検出済みかどうか
+ * @returns `{ count, unitLabel }` または、個数が見つからない場合は `null`
  */
 function extractCount(
   text: string,
@@ -149,6 +157,9 @@ function extractCount(
  *
  * 副次的な重量（タレ・調味料など）は主量の判定から除外される。
  * 副次量のみ残った場合は `unknown`（reason: `"mixed-set"`）を返す。
+ *
+ * @param text - 商品名・説明文を連結した生テキスト
+ * @returns 抽出結果。量が特定できない場合は `{ kind: "unknown", reason: ... }`。
  */
 export function extract(text: string): ExtractResult {
   const allQs = extractQuantities(text);
