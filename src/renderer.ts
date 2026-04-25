@@ -52,7 +52,12 @@ export function processCard(card: Element, schema: CardSchema): boolean {
   const descText = schema.description
     ? (card.querySelector(schema.description)?.textContent ?? "")
     : "";
-  const extracted = extract(`${nameText} ${descText}`);
+
+  // 商品名を優先して抽出し、unknown の場合のみ説明文にフォールバックする。
+  // 名前＋説明文を単純結合すると同じ重量が重複カウントされるため。
+  const extractedFromName = extract(nameText);
+  const extracted =
+    extractedFromName.kind === "unknown" && descText ? extract(descText) : extractedFromName;
 
   const result = calcUnitPrice(price, extracted);
   if (!result) {
