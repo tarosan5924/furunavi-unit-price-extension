@@ -11,6 +11,10 @@ describe("extract", () => {
       expect(extract("1.2kg")).toEqual({ kind: "weight", amountG: 1200 });
     });
 
+    it("Unicode の特殊単位記号 ㎏ を正規化", () => {
+      expect(extract("約1.5㎏")).toEqual({ kind: "weight", amountG: 1500 });
+    });
+
     it("g × 個数の乗算", () => {
       expect(extract("500g×2パック")).toEqual({ kind: "weight", amountG: 1000 });
     });

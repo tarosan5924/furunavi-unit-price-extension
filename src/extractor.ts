@@ -158,11 +158,18 @@ function extractCount(
  * 副次的な重量（タレ・調味料など）は主量の判定から除外される。
  * 副次量のみ残った場合は `unknown`（reason: `"mixed-set"`）を返す。
  *
- * @param text - 商品名・説明文を連結した生テキスト
+ * @param text - 商品名または説明文の生テキスト
  * @returns 抽出結果。量が特定できない場合は `{ kind: "unknown", reason: ... }`。
  */
 export function extract(text: string): ExtractResult {
-  const allQs = extractQuantities(text);
+  // Unicode の特殊単位記号を ASCII に正規化する（例: ㎏→kg, ㎖→ml, ㍑→L）
+  const normalized = text
+    .replace(/㎏/g, "kg")
+    .replace(/㎖/g, "ml")
+    .replace(/㍑/g, "L")
+    .replace(/㎎/g, "mg");
+
+  const allQs = extractQuantities(normalized);
   const primaryQs = allQs.filter((q) => !q.isSecondary);
   const secondaryQs = allQs.filter((q) => q.isSecondary);
 
