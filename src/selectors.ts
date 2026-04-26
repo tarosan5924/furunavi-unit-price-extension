@@ -11,11 +11,28 @@ import type { CardSchema } from "./types";
  */
 export const SCHEMAS: CardSchema[] = [
   {
-    cardSelector: "ul.list-product > li",
+    // 検索ページのメインリスト（div.product-attr 構造）
+    cardSelector: "ul.list-product:not(.carousel):not(.ranking) > li",
     name: "h2.product-name a",
     price: "div.product-attr p.product-price",
     description: "div.product-content",
     badgeAnchor: "div.product-attr",
+  },
+  {
+    // ランキングページ・カルーセル（div.product-info 構造）
+    cardSelector: "ul.list-product.ranking > li, ul.list-product.carousel > li",
+    name: ":is(h2, p).product-name a",
+    price: "p.product-price",
+    description: null,
+    badgeAnchor: "div.product-info",
+  },
+  {
+    // 詳細ページのメイン商品
+    cardSelector: "div.page-product_detail main",
+    name: "h1.product-name-text",
+    price: "dl.product-info-price dd strong",
+    description: null,
+    badgeAnchor: "dl.product-info-price",
   },
   {
     cardSelector: "li.swiper-slide.product_frame",
