@@ -3,3 +3,5 @@ dist/
 coverage/
 *.log
 .DS_Store
+tests/fixtures/
+tests/integration.test.ts
