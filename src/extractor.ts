@@ -42,16 +42,34 @@ type RawQuantity = {
  * @returns 抽出した量の配列（副次フラグ付き）。マッチがなければ空配列。
  */
 function extractQuantities(text: string): RawQuantity[] {
+  // 「500ml×2箱(48本入り)」: ×n箱/ケースの後に括弧内で総本数が示されているパターン
+  const boxMulRe =
+    /(\d+(?:\.\d+)?)\s*(kg|g|L|ml)\s*[×xX*✕]\s*\d+(?:\.\d+)?\s*(?:箱|ケース)[^（(\d]*[（(]\s*(\d+(?:\.\d+)?)\s*(?:本|個)(?:入り)?[）)]/g;
   // 乗算パターン: 500g×2 / 1.2kg×3 など
   const mulRe = /(\d+(?:\.\d+)?)\s*(kg|g|L|ml)\s*[×xX*✕]\s*(\d+(?:\.\d+)?)/g;
   // 単純パターン: 約500g / 1.2kg以上 など
   const singleRe = /(?:約|凡そ|おおよそ)?\s*(\d+(?:\.\d+)?)\s*(kg|g|L|ml)(?:以上|程度|前後)?/g;
 
   const results: RawQuantity[] = [];
+  const mulPositions = new Set<number>();
+
+  // 箱/ケース+括弧内総数パターンを最優先で処理
+  for (const m of text.matchAll(boxMulRe)) {
+    const value = parseFloat(m[1]) * parseFloat(m[3]);
+    const unit = m[2] as RawQuantity["unit"];
+    const before = text.slice(0, m.index ?? 0);
+    const isSecondary = SECONDARY_KEYWORDS.test(before.slice(-20));
+    results.push({ value, unit, isSecondary });
+    for (let i = m.index ?? 0; i < (m.index ?? 0) + m[0].length; i++) {
+      mulPositions.add(i);
+    }
+  }
 
   // 乗算を先に抽出（単純パターンより優先）
-  const mulPositions = new Set<number>();
   for (const m of text.matchAll(mulRe)) {
+    if (mulPositions.has(m.index ?? 0)) {
+      continue;
+    }
     const value = parseFloat(m[1]) * parseFloat(m[3]);
     const unit = m[2] as RawQuantity["unit"];
     // マッチ位置の前にある直近のキーワードで副次判定
@@ -67,8 +85,15 @@ function extractQuantities(text: string): RawQuantity[] {
   // 単純パターンで乗算と重ならない位置のみ追加
   for (const m of text.matchAll(singleRe)) {
     const startIdx = m.index ?? 0;
-    // 乗算パターンが占有している範囲と重なっていたらスキップ
-    if (mulPositions.has(startIdx)) {
+    // 乗算パターンが占有している範囲と重なっていたらスキップ（先頭スペース込みのマッチにも対応）
+    let overlaps = false;
+    for (let i = startIdx; i < startIdx + m[0].length; i++) {
+      if (mulPositions.has(i)) {
+        overlaps = true;
+        break;
+      }
+    }
+    if (overlaps) {
       continue;
     }
     const unit = m[2] as RawQuantity["unit"];
@@ -173,23 +198,25 @@ export function extract(text: string): ExtractResult {
   const primaryQs = allQs.filter((q) => !q.isSecondary);
   const secondaryQs = allQs.filter((q) => q.isSecondary);
 
-  // 主量から重量・容量を計算
-  if (primaryQs.length > 0) {
-    const normalized = normalizeQuantities(primaryQs);
-    if (normalized) {
-      return normalized;
-    }
-  }
-
-  // 主量がなく副次量だけある場合は混合セットとみなす
   if (primaryQs.length === 0 && secondaryQs.length > 0) {
     return { kind: "unknown", reason: "mixed-set" };
   }
 
-  // 個数を試みる（重量・容量が見つかった上で個数も抽出できる場合は重量優先なので
-  // ここに到達するのは重量・容量がないケースのみ）
-  const hasWeightOrVolume = primaryQs.length > 0;
-  const countResult = extractCount(text, hasWeightOrVolume);
+  const norm = normalizeQuantities(primaryQs);
+  if (norm) {
+    // × 記号による乗算は extractQuantities で処理済みのためスキップ。
+    // 「500ml 35本」「350ml（24本）」のように × なしで個数が併記されている場合のみ乗算する。
+    const hasMulSymbol = /\d\s*(kg|g|L|ml)\s*[×xX*✕]\s*\d/.test(normalized);
+    const count = hasMulSymbol ? null : (extractCount(text, true)?.count ?? null);
+    if (count !== null) {
+      return norm.kind === "weight"
+        ? { kind: "weight", amountG: norm.amountG * count }
+        : { kind: "volume", amountMl: norm.amountMl * count };
+    }
+    return norm;
+  }
+
+  const countResult = extractCount(text, primaryQs.length > 0);
   if (countResult) {
     return { kind: "count", ...countResult };
   }

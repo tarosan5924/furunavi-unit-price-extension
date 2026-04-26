@@ -43,8 +43,44 @@ describe("extract", () => {
   });
 
   describe("容量（volume）", () => {
-    it("ml × 個数の乗算", () => {
+    it("ml × 個数の乗算（× 記号あり）", () => {
       expect(extract("500ml×24本")).toEqual({ kind: "volume", amountMl: 12000 });
+    });
+
+    it("本数が × 記号なしで前置されている", () => {
+      expect(
+        extract("強炭酸水 VOX ストレート バナジウム 35本 500ml 富士吉田市限定カートン 炭酸"),
+      ).toEqual({
+        kind: "volume",
+        amountMl: 17500,
+      });
+    });
+
+    it("本数が括弧内に後置されている", () => {
+      expect(extract("キリンビール 一番搾り 生 ビール ＜千歳工場産＞350ml（24本）")).toEqual({
+        kind: "volume",
+        amountMl: 8400,
+      });
+    });
+
+    it("×n箱(m本入り) パターン: 箱数×単位量+括弧内総本数", () => {
+      expect(extract("強炭酸水 ウィルキンソンタンサン PET500ml×2箱(48本入り) アサヒ 炭酸")).toEqual(
+        { kind: "volume", amountMl: 24000 },
+      );
+    });
+
+    it("×n箱(m本) 全角括弧パターン", () => {
+      expect(extract("ビール 350ml×2箱（48本）")).toEqual({
+        kind: "volume",
+        amountMl: 16800,
+      });
+    });
+
+    it("×nケース(m本入り) パターン", () => {
+      expect(extract("麦茶 500ml×1ケース(24本入り)")).toEqual({
+        kind: "volume",
+        amountMl: 12000,
+      });
     });
   });
 
