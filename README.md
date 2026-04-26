@@ -4,7 +4,7 @@
 
 ## インストール（unpacked 拡張として読み込む）
 
-1. `pnpm install && pnpm icons && pnpm build` を実行してビルド済みファイルを生成する
+1. `pnpm install && pnpm build` を実行してビルド済みファイルを生成する
 2. Chrome で `chrome://extensions/` を開く
 3. 右上の「デベロッパーモード」を有効にする
 4. 「パッケージ化されていない拡張機能を読み込む」をクリックし、**このリポジトリのルートディレクトリ**を選択する
@@ -17,7 +17,6 @@ pnpm test          # テストを一括実行
 pnpm test:watch    # ファイル変更を監視してテストを再実行
 pnpm lint          # Biome によるリント
 pnpm build         # Vite で dist/content.js をビルド
-pnpm icons         # icons/ に PNG アイコンを生成
 ```
 
 ## アーキテクチャ

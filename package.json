@@ -10,7 +10,6 @@
     "format": "biome format --write .",
     "lint": "biome check .",
     "build": "vite build",
-    "icons": "node scripts/generate-icons.mjs",
     "prepare": "lefthook install"
   },
   "devDependencies": {
