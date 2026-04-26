@@ -19,8 +19,9 @@ export const SCHEMAS: CardSchema[] = [
     badgeAnchor: "div.product-attr",
   },
   {
-    // ランキングページ・カルーセル（div.product-info 構造）
-    cardSelector: "ul.list-product.ranking > li, ul.list-product.carousel > li",
+    // ランキングページ・カルーセル・特集ページ・トップページ（div.product-info 構造）
+    cardSelector:
+      ":is(ul, ol).list-product.ranking > li, ul.list-product.carousel > li, ul.list-product:not(.ranking):not(.carousel) > li:has(div.product-info)",
     name: ":is(h2, p).product-name a",
     price: "p.product-price",
     description: null,

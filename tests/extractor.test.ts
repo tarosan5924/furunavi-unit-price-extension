@@ -30,6 +30,10 @@ describe("extract", () => {
       expect(extract("シャインマスカット2kg(3～5房)")).toEqual({ kind: "weight", amountG: 2000 });
     });
 
+    it("玉は重量と併記なら無視（合計重量として扱う）", () => {
+      expect(extract("オトメメロン 2玉 約2kg")).toEqual({ kind: "weight", amountG: 2000 });
+    });
+
     it("重量優先: 房と kg が並ぶ場合は kg を採用", () => {
       expect(extract("シャインマスカット 2～3房 （1.0kg以上）")).toEqual({
         kind: "weight",

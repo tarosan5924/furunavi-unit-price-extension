@@ -157,7 +157,7 @@ function extractCount(
 ): { count: number; unitLabel: string } | null {
   // 重量がある場合は「房」「株」を除外
   const units = hasWeightOrVolume
-    ? COUNT_UNITS.filter((u) => u !== "房" && u !== "株")
+    ? COUNT_UNITS.filter((u) => u !== "房" && u !== "株" && u !== "玉")
     : COUNT_UNITS;
 
   for (const unit of units) {
