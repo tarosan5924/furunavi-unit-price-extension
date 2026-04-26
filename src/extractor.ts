@@ -41,6 +41,32 @@ type RawQuantity = {
  * @param text - 商品名・説明文などの生テキスト
  * @returns 抽出した量の配列（副次フラグ付き）。マッチがなければ空配列。
  */
+/**
+ * 「5kg(5kg×1袋)」のように括弧内の乗算と括弧外の同一量が重複するケースを防ぐ。
+ * 乗算マッチの直前が括弧開きなら、括弧の外側にある量の位置を mulPositions に追加する。
+ */
+function markPrecedingQuantityBeforeParen(
+  text: string,
+  mulStart: number,
+  mulPositions: Set<number>,
+): void {
+  const beforeMul = text.slice(0, mulStart);
+  if (!/[（(]\s*$/.test(beforeMul)) {
+    return;
+  }
+
+  const beforeParen = beforeMul.replace(/[（(]\s*$/, "");
+  const precedingMatch = beforeParen.match(/(\d+(?:\.\d+)?)\s*(kg|g|L|ml)\s*$/);
+  if (!precedingMatch) {
+    return;
+  }
+
+  const precedingStart = beforeParen.length - precedingMatch[0].length;
+  for (let i = precedingStart; i < beforeParen.length; i++) {
+    mulPositions.add(i);
+  }
+}
+
 function extractQuantities(text: string): RawQuantity[] {
   // 「500ml×2箱(48本入り)」: ×n箱/ケースの後に括弧内で総本数が示されているパターン
   const boxMulRe =
@@ -80,6 +106,9 @@ function extractQuantities(text: string): RawQuantity[] {
     for (let i = m.index ?? 0; i < (m.index ?? 0) + m[0].length; i++) {
       mulPositions.add(i);
     }
+    // 「5kg(5kg×1袋)」パターンの重複防止:
+    // 乗算が括弧の直後にある場合、括弧の外側にある同一量もスキップ対象に追加する
+    markPrecedingQuantityBeforeParen(text, m.index ?? 0, mulPositions);
   }
 
   // 単純パターンで乗算と重ならない位置のみ追加

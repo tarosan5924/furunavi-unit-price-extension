@@ -34,6 +34,15 @@ describe("extract", () => {
       expect(extract("オトメメロン 2玉 約2kg")).toEqual({ kind: "weight", amountG: 2000 });
     });
 
+    it("括弧内の乗算が括弧外の同一量を重複カウントしない", () => {
+      expect(
+        extract("無洗米ふるさと無洗米 5kg(5kg×1袋)《1-5日以内に出荷予定(土日祝除く)》"),
+      ).toEqual({
+        kind: "weight",
+        amountG: 5000,
+      });
+    });
+
     it("重量優先: 房と kg が並ぶ場合は kg を採用", () => {
       expect(extract("シャインマスカット 2～3房 （1.0kg以上）")).toEqual({
         kind: "weight",
